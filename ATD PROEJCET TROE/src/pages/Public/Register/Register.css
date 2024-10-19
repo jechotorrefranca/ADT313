@@ -1,0 +1,45 @@
+.formCont{
+    height: 100vh;
+    width: 100vw;
+    /* background-color: aqua; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.whole{
+    text-align: center;
+}
+
+.formDiv{
+    width: fit-content;
+    height: fit-content;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    padding: 4rem 2rem;
+    
+}
+
+.inputCont{
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.showPassCont{
+    display: flex;
+    justify-content: end;
+}
+
+.inputs{
+    display: flex;
+    gap: 1rem;
+    justify-content:space-between;
+}
+
+.alrAcc{
+    margin-top: 12px;
+}
+
+.showPass {
+    cursor: pointer;
+}
