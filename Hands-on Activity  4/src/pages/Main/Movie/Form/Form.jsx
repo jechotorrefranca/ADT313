@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./Form.css";
 
 const Form = () => {
@@ -9,56 +8,37 @@ const Form = () => {
   const [searchedMovieList, setSearchedMovieList] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(undefined);
   const [movie, setMovie] = useState(undefined);
+  const [page, setpage] = useState(1); // Track current page
+  const [totalPages, setTotalPages] = useState(1); // Total pages for search results
   let { movieId } = useParams();
-
-  // Pagination States
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
   const navigate = useNavigate();
 
-  const totalPages = Math.ceil(searchedMovieList.length / itemsPerPage);
-
   const handleSearch = useCallback(() => {
-    let allResults = [];
-    const maxPages = 5;
-    const fetchMoviesByPage = async (page = 1) => {
-      try {
-        const response = await axios({
-          method: "get",
-          url: `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=${page}`,
-          headers: {
-            Accept: "application/json",
-            Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YTdiNmUyNGJkNWRkNjhiNmE1ZWFjZjgyNWY3NGY5ZCIsIm5iZiI6MTcyOTI5NzI5Ny4wNzMzNTEsInN1YiI6IjY2MzhlZGM0MmZhZjRkMDEzMGM2NzM3NyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.ZIX4EF2yAKl6NwhcmhZucxSQi1rJDZiGG80tDd6_9XI",
-          },
-        });
-
-        allResults = [...allResults, ...response.data.results];
-
-        if (page < response.data.total_pages && page < maxPages) {
-          await fetchMoviesByPage(page + 1);
-        } else {
-          setSearchedMovieList(allResults);
-        }
-      } catch (error) {
+    axios({
+      method: "get",
+      url: `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=${page}`,
+      headers: {
+        Accept: "application/json",
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YTdiNmUyNGJkNWRkNjhiNmE1ZWFjZjgyNWY3NGY5ZCIsIm5iZiI6MTcyOTI5NzI5Ny4wNzMzNTEsInN1YiI6IjY2MzhlZGM0MmZhZjRkMDEzMGM2NzM3NyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.ZIX4EF2yAKl6NwhcmhZucxSQi1rJDZiGG80tDd6_9XI",
+      },
+    })
+      .then((response) => {
+        setSearchedMovieList(response.data.results);
+        setTotalPages(response.data.total_pages);
+      })
+      .catch((error) => {
         console.log(error);
         alert(error);
-      }
-    };
-
-    fetchMoviesByPage();
-  }, [query]);
+      });
+  }, [query, page]);
 
   const handleSelectMovie = (movie) => {
     setSelectedMovie(movie);
   };
 
   const handleSave = () => {
-    console.log(selectedMovie);
-
     const accessToken = localStorage.getItem("accessToken");
-    console.log(accessToken);
     if (selectedMovie === undefined) {
       alert("Please search and select a movie.");
     } else {
@@ -76,7 +56,7 @@ const Form = () => {
 
       axios({
         method: movieId ? "patch" : "post",
-        url: movieId ? `/movies/${movieId}` : `/movies`,
+        url: movieId ? `/movies/${movieId}` : "/movies",
         data: data,
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -87,10 +67,7 @@ const Form = () => {
           alert("Success");
           navigate("/main/movies");
         })
-        .catch((error) => {
-          console.log(error);
-          alert(error);
-        });
+        .catch((error) => console.log(error));
     }
   };
 
@@ -108,21 +85,25 @@ const Form = () => {
           vote_average: response.data.voteAverage,
         };
         setSelectedMovie(tempData);
-        console.log(response.data);
       });
     }
-  }, [movieId]);
+  }, []);
 
-  const handlePageChange = (page) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page);
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setpage((prevPage) => prevPage + 1);
     }
   };
 
-  const paginatedMovies = searchedMovieList.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setpage((prevPage) => prevPage - 1);
+    }
+  };
+
+  useEffect(() => {
+    if (query) handleSearch();
+  }, [page]);
 
   return (
     <>
@@ -140,35 +121,29 @@ const Form = () => {
               Search
             </button>
             <div className="searched-movie">
-              {paginatedMovies.map((movie) => (
-                <p onClick={() => handleSelectMovie(movie)} key={movie.id}>
+              {searchedMovieList.map((movie) => (
+                <p key={movie.id} onClick={() => handleSelectMovie(movie)}>
                   {movie.original_title}
                 </p>
               ))}
             </div>
           </div>
-          
-          {/* Pagination */}
 
-          {searchedMovieList.length > 0 &&(
-            <div className="pagination">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span>
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-            
+          {searchedMovieList.length > 0 && (
+            <>
+              <div className="pagination">
+                <button onClick={handlePreviousPage} disabled={page === 1}>
+                  Previous
+                </button>
+                <span>
+                  Page {page} of {totalPages}
+                </span>
+                <button onClick={handleNextPage} disabled={page === totalPages}>
+                  Next
+                </button>
+              </div>
+              <hr />
+            </>
           )}
         </>
       )}
@@ -179,7 +154,7 @@ const Form = () => {
             <img
               className="poster-image"
               src={`https://image.tmdb.org/t/p/original/${selectedMovie.poster_path}`}
-              alt="Movie Poster"
+              alt={selectedMovie.original_title}
             />
           ) : (
             ""
@@ -209,12 +184,11 @@ const Form = () => {
               }
             />
           </div>
-
           <div className="field">
             Popularity:
             <input
-              disabled={!movieId}
               type="text"
+              disabled={!movieId}
               value={selectedMovie ? selectedMovie.popularity : ""}
               onChange={(e) =>
                 setSelectedMovie({
@@ -224,12 +198,11 @@ const Form = () => {
               }
             />
           </div>
-
           <div className="field">
             Release Date:
             <input
-              disabled={!movieId}
               type="text"
+              disabled={!movieId}
               value={selectedMovie ? selectedMovie.release_date : ""}
               onChange={(e) =>
                 setSelectedMovie({
@@ -239,12 +212,11 @@ const Form = () => {
               }
             />
           </div>
-
           <div className="field">
             Vote Average:
             <input
-              disabled={!movieId}
               type="text"
+              disabled={!movieId}
               value={selectedMovie ? selectedMovie.vote_average : ""}
               onChange={(e) =>
                 setSelectedMovie({
@@ -254,7 +226,6 @@ const Form = () => {
               }
             />
           </div>
-
           <button type="button" onClick={handleSave}>
             Save
           </button>
