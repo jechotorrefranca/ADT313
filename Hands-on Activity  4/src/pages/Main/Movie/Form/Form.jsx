@@ -8,8 +8,8 @@ const Form = () => {
   const [searchedMovieList, setSearchedMovieList] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(undefined);
   const [movie, setMovie] = useState(undefined);
-  const [page, setpage] = useState(1); // Track current page
-  const [totalPages, setTotalPages] = useState(1); // Total pages for search results
+  const [page, setpage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   let { movieId } = useParams();
   const navigate = useNavigate();
 
