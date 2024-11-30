@@ -19,20 +19,19 @@ const Form = () => {
     console.log(movieId2);
     console.log(movieId);
 
-    if (!selectedVideo || !selectedVideo.key) {
-      alert("Please select a video before adding.");
-      return false; // Indicate failure
-    }
+    // If no videos are found, proceed with empty fields in videoData
 
     const accessToken = localStorage.getItem("accessToken");
     const videoData = {
       movieId: movieId ? movieId : movieId2, // Use the dynamically provided movieId
-      url: `https://www.youtube.com/embed/${selectedVideo.key}`,
-      name: selectedVideo.name,
-      site: selectedVideo.site,
-      videoKey: selectedVideo.key,
-      videoType: selectedVideo.type,
-      official: selectedVideo.official,
+      url: selectedVideo?.key
+        ? `https://www.youtube.com/embed/${selectedVideo.key}`
+        : "https://www.youtube.com/embed/not_available", // Use placeholder URL
+      name: selectedVideo?.name || "No video selected", // Default name if no video selected
+      site: selectedVideo?.site || "YouTube", // Default site as "YouTube"
+      videoKey: selectedVideo?.key || "not_available", // Default key
+      videoType: selectedVideo?.type || "placeholder", // Default type
+      official: selectedVideo?.official || false, // Default to false
     };
 
     console.log(videoData);
@@ -103,9 +102,13 @@ const Form = () => {
   };
 
   const handleSave = async () => {
-    if (!selectedVideo || !selectedVideo.key) {
-      alert("Please select a video before adding.");
-      return false; // Indicate failure
+    if (videos && videos.length > 0 && (!selectedVideo || !selectedVideo.key)) {
+      alert("Videos are available. Please select a video before proceeding.");
+      return false; // Stop the process
+    }
+
+    if (!videos || videos.length <= 0) {
+      alert("No videos found. Proceeding with empty video data.");
     }
 
     const accessToken = localStorage.getItem("accessToken");
@@ -296,8 +299,6 @@ const Form = () => {
             Save
           </button>
         </form>
-
-        <button onClick={() => console.log(selectedVideo)}>adsknfadlvad</button>
 
         <h2>Videos</h2>
 
