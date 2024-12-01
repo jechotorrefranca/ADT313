@@ -8,8 +8,8 @@ const Form = () => {
   const [searchedMovieList, setSearchedMovieList] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(undefined);
   const [movie, setMovie] = useState(undefined);
-  const [videos, setVideos] = useState([]); // New state for videos
-  const [newVideoUrl, setNewVideoUrl] = useState(""); // New state for new video URL
+  const [videos, setVideos] = useState([]);
+  const [newVideoUrl, setNewVideoUrl] = useState("");
   const navigate = useNavigate();
   let { movieId } = useParams();
   const [description, setDescription] = useState("");
@@ -19,19 +19,17 @@ const Form = () => {
     console.log(movieId2);
     console.log(movieId);
 
-    // If no videos are found, proceed with empty fields in videoData
-
     const accessToken = localStorage.getItem("accessToken");
     const videoData = {
-      movieId: movieId ? movieId : movieId2, // Use the dynamically provided movieId
+      movieId: movieId ? movieId : movieId2,
       url: selectedVideo?.key
         ? `https://www.youtube.com/embed/${selectedVideo.key}`
-        : "https://www.youtube.com/embed/not_available", // Use placeholder URL
-      name: selectedVideo?.name || "No video selected", // Default name if no video selected
-      site: selectedVideo?.site || "YouTube", // Default site as "YouTube"
-      videoKey: selectedVideo?.key || "not_available", // Default key
-      videoType: selectedVideo?.type || "placeholder", // Default type
-      official: selectedVideo?.official || false, // Default to false
+        : "https://www.youtube.com/embed/not_available", 
+      name: selectedVideo?.name || "No video selected",
+      site: selectedVideo?.site || "YouTube",
+      videoKey: selectedVideo?.key || "not_available",
+      videoType: selectedVideo?.type || "placeholder",
+      official: selectedVideo?.official || false,
     };
 
     console.log(videoData);
@@ -47,11 +45,11 @@ const Form = () => {
       });
       console.log("Video added successfully:", response.data);
       alert("Video added successfully!");
-      return true; // Indicate success
+      return true;
     } catch (error) {
       console.error("Error adding video:", error);
       alert("Failed to add video. Please try again.");
-      return false; // Indicate failure
+      return false;
     }
   };
 
@@ -87,24 +85,24 @@ const Form = () => {
       )
       .then((response) => {
         const videoResults = response.data.results;
-        setVideos(videoResults.length > 0 ? videoResults : ""); // Set to "" if no videos are found
+        setVideos(videoResults.length > 0 ? videoResults : ""); 
         console.log("Videos from TMDB:", videoResults);
       })
       .catch((error) => {
         console.error("Error fetching videos:", error);
-        setVideos(""); // Set to "" in case of error
+        setVideos("");
       });
   };
 
   const handleSelectMovie = (movie) => {
     setSelectedMovie(movie);
-    fetchVideos(movie.id); // Fetch videos for the selected movie
+    fetchVideos(movie.id);
   };
 
   const handleSave = async () => {
     if (videos && videos.length > 0 && (!selectedVideo || !selectedVideo.key)) {
       alert("Videos are available. Please select a video before proceeding.");
-      return false; // Stop the process
+      return false; 
     }
 
     if (!videos || videos.length <= 0) {
@@ -131,7 +129,6 @@ const Form = () => {
     };
 
     try {
-      // Dynamically decide between patch and post
       const response = await axios({
         method: movieId ? "patch" : "post",
         url: movieId ? `/movies/${movieId}` : "/movies",
@@ -141,21 +138,18 @@ const Form = () => {
         },
       });
 
-      // Get the movie ID, either from existing state or the response for a new movie
-      const newMovieId = movieId || response.data.id; // Use existing movieId if present, otherwise get from response
+      const newMovieId = movieId || response.data.id;
       console.log("safjadsfdsgfdsfhdsbfj", movieId || "sd");
       console.log("safjadsfdsgfdsfhdsbfj", newMovieId);
       console.log("Movie saved successfully:", response.data);
       alert("Movie saved successfully!");
 
-      // Proceed to add the video
-      const isVideoAdded = await handleAddVideo(newMovieId); // Pass movieId dynamically
+      const isVideoAdded = await handleAddVideo(newMovieId);
       if (!isVideoAdded) {
         alert("Video could not be added. Please try again.");
         return;
       }
 
-      // Navigate to the movie details page
       navigate(`/main/movies`);
     } catch (error) {
       console.error("Error saving movie:", error);
@@ -165,7 +159,6 @@ const Form = () => {
 
   useEffect(() => {
     if (movieId) {
-      // Fetch movie details from your server
       axios
         .get(`/movies/${movieId}`)
         .then((response) => {
@@ -182,10 +175,9 @@ const Form = () => {
           setSelectedMovie(tempData);
           console.log(response.data);
 
-          // Fetch videos from TMDB using the TMDB ID
           return response.data.tmdbId;
         })
-        .then(fetchVideos) // Use the reusable function here
+        .then(fetchVideos)
         .catch((error) => console.log(error));
     }
   }, [movieId]);
@@ -309,7 +301,6 @@ const Form = () => {
                 <p>{video.name}</p>
                 <div className="videolist">
                   <div className="video-preview">
-                    {/* Assuming the video.key is the unique identifier for a YouTube video */}
                     <iframe
                       width="280"
                       height="158"
@@ -330,11 +321,6 @@ const Form = () => {
                   </button>
                 </div>
 
-                {/* <div>
-                  <button type="button" onClick={handleAddVideo}>
-                    Add Video
-                  </button>
-                </div> */}
               </div>
             ))
           ) : (
@@ -343,7 +329,7 @@ const Form = () => {
         </div>
       </div>
 
-      {<h1>"KAYO NALANG BAHALA MAGLAGAY SA OUTLET"</h1>}
+      {<h1>"KAYO NALANG BAHALA MAGLAGAY SA OUTLET, DI NA KAYA NG UTAK KO"</h1>}
 
       {movieId && (
         <div>
