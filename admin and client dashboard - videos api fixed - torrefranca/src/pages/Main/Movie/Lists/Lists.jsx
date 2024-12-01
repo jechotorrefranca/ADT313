@@ -8,7 +8,6 @@ const Lists = () => {
   const [lists, setLists] = useState([]);
 
   const getMovies = () => {
-    //get the movies from the api or database
     axios.get("/movies").then((response) => {
       setLists(response.data);
     });
@@ -22,7 +21,6 @@ const Lists = () => {
       "Are you sure that you want to delete this data?"
     );
     if (isConfirm) {
-      // Delete from /movies/:id
       axios
         .delete(`/movies/${id}`, {
           headers: {
@@ -30,7 +28,6 @@ const Lists = () => {
           },
         })
         .then(() => {
-          // Delete from /videos/:id
           axios
             .delete(`/videos/${id}`, {
               headers: {
@@ -38,15 +35,12 @@ const Lists = () => {
               },
             })
             .then(() => {
-              // Update the list after deletion
               const tempLists = [...lists];
               const index = lists.findIndex((movie) => movie.id === id);
               if (index !== undefined || index !== -1) {
                 tempLists.splice(index, 1);
                 setLists(tempLists);
               }
-              // Alternatively, refresh the list from API
-              // getMovies();
             })
             .catch((error) => {
               console.error("Error deleting video:", error);
