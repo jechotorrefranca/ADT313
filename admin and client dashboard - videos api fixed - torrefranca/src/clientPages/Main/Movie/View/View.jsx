@@ -54,7 +54,6 @@ function View() {
 
           {movie.videos && movie.videos[0] ? (
             <div className="video-preview">
-              {/* Assuming the video.key is the unique identifier for a YouTube video */}
               <iframe
                 width="560"
                 height="315"
